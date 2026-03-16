@@ -70,6 +70,31 @@ val* val_eval(env* e, val* v) {
             return val_create_lambda(e, formals, body);
         }
 
+        if (first->type == VAL_SYMBOL && strcmp(first->symbol, "if") == 0) {
+            val* args = v->cdr;
+            
+            if (args->type != VAL_CONS || args->cdr->type != VAL_CONS || 
+                args->cdr->cdr->type != VAL_CONS || args->cdr->cdr->cdr->type != VAL_NIL) {
+                return val_create_err("ERR: 'if' expects 3 arguments: condition, true-branch, false-branch");
+            }
+            
+            val* cond = args->car;
+            val* true_expr = args->cdr->car;
+            val* false_expr = args->cdr->cdr->car;
+            
+            val* cond_res = val_eval(e, cond);
+            if (cond_res->type == VAL_ERR) return cond_res;
+            
+            int is_true = (cond_res->type != VAL_NIL);
+            val_free(cond_res);
+            
+            if (is_true) {
+                return val_eval(e, true_expr);
+            } else {
+                return val_eval(e, false_expr);
+            }
+        }
+
         val* f = val_eval(e, first);
         if (f->type == VAL_ERR) return f;
 

@@ -44,3 +44,63 @@ val* builtin_add(env* e, val* args) { return builtin_math(e, args, "+"); }
 val* builtin_sub(env* e, val* args) { return builtin_math(e, args, "-"); }
 val* builtin_mul(env* e, val* args) { return builtin_math(e, args, "*"); }
 val* builtin_div(env* e, val* args) { return builtin_math(e, args, "/"); }
+
+
+static val* builtin_cmp(env* e, val* args, const char* op) {
+    if (args->type != VAL_CONS || args->cdr->type != VAL_CONS || args->cdr->cdr->type != VAL_NIL) {
+        return val_create_err("ERR: comparison expects exactly 2 arguments");
+    }
+    
+    val* a = args->car;
+    val* b = args->cdr->car;
+    
+    if (a->type != VAL_INT || b->type != VAL_INT) {
+        return val_create_err("ERR: comparison expects numbers");
+    }
+
+    int res = 0;
+    if (strcmp(op, "=") == 0) res = (a->num == b->num);
+    else if (strcmp(op, ">") == 0) res = (a->num > b->num);
+    else if (strcmp(op, "<") == 0) res = (a->num < b->num);
+
+    if (res) return val_create_symbol("T");
+    else return val_create_nil();
+}
+
+val* builtin_eq(env* e, val* args) { return builtin_cmp(e, args, "="); }
+val* builtin_gt(env* e, val* args) { return builtin_cmp(e, args, ">"); }
+val* builtin_lt(env* e, val* args) { return builtin_cmp(e, args, "<"); }
+
+
+val* builtin_list(env* e, val* args) {
+    return val_copy(args);
+}
+
+val* builtin_car(env* e, val* args) {
+    if (args->type != VAL_CONS || args->cdr->type != VAL_NIL) 
+        return val_create_err("ERR: 'car' expects exactly 1 argument");
+    
+    val* lst = args->car;
+    if (lst->type == VAL_NIL) return val_create_nil(); 
+    if (lst->type != VAL_CONS) return val_create_err("ERR: 'car' expects a list");
+    
+    return val_copy(lst->car);
+}
+
+val* builtin_cdr(env* e, val* args) {
+    if (args->type != VAL_CONS || args->cdr->type != VAL_NIL) 
+        return val_create_err("ERR: 'cdr' expects exactly 1 argument");
+    
+    val* lst = args->car;
+    if (lst->type == VAL_NIL) return val_create_nil();
+    if (lst->type != VAL_CONS) return val_create_err("ERR: 'cdr' expects a list");
+    
+    return val_copy(lst->cdr);
+}
+
+val* builtin_cons(env* e, val* args) {
+    if (args->type != VAL_CONS || args->cdr->type != VAL_CONS || args->cdr->cdr->type != VAL_NIL) 
+        return val_create_err("ERR: 'cons' expects exactly 2 arguments");
+    
+    return val_create_cons(val_copy(args->car), val_copy(args->cdr->car));
+}

@@ -6,6 +6,12 @@
 env* env_create(env* parent) {
     env* new_env = malloc(sizeof(env));
     new_env->parent = parent;
+
+    new_env->ref_count = 1;
+    if (parent != NULL) {
+        parent->ref_count++;
+    }
+
     new_env->capacity = 10;
     new_env->count = 0;
     new_env->symbols = malloc(sizeof(char*) * new_env->capacity);
@@ -14,23 +20,18 @@ env* env_create(env* parent) {
 }
 
 env* env_copy(env* e) {
-    if (e == NULL) return NULL;
-    
-    env* new_env = malloc(sizeof(env));
-    new_env->parent = env_copy(e->parent);
-    new_env->capacity = e->capacity;
-    new_env->count = e->count;
-    new_env->symbols = malloc(sizeof(char*) * new_env->capacity);
-    new_env->vals = malloc(sizeof(val*) * new_env->capacity);
-    
-    for (int i = 0; i < e->count; i++) {
-        new_env->symbols[i] = strdup(e->symbols[i]);
-        new_env->vals[i] = val_copy(e->vals[i]);
+    if (e != NULL) {
+        e->ref_count++;
     }
-    return new_env;
+    return e;
 }
 
 void env_free(env* e) {
+    if (e == NULL) return;
+
+    e->ref_count--;
+    if (e->ref_count > 0) return; 
+
     for (int i = 0; i < e->count; i++) {
         free(e->symbols[i]); val_free(e->vals[i]);
     }

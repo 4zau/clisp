@@ -57,6 +57,7 @@ val* val_copy(val* v);
 
 typedef struct env {
     struct env* parent;
+    int ref_count;
     long count;
     long capacity;
     char** symbols;
@@ -78,5 +79,14 @@ val* builtin_add(env* e, val* args);
 val* builtin_sub(env* e, val* args);
 val* builtin_mul(env* e, val* args);
 val* builtin_div(env* e, val* args);
+
+val* builtin_eq(env* e, val* args);
+val* builtin_gt(env* e, val* args);
+val* builtin_lt(env* e, val* args);
+
+val* builtin_list(env* e, val* args);
+val* builtin_car(env* e, val* args);
+val* builtin_cdr(env* e, val* args);
+val* builtin_cons(env* e, val* args);
 
 #endif
