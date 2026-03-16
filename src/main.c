@@ -4,12 +4,14 @@
 #include <string.h>
 #include "lisp.h"
 
-void print_help() {
+static env* global_env_ptr = NULL;
+
+static void print_help() {
     printf("LISP interpreter in REPL mode\n\n");
     printf("use 'def' to create variables or lambda functions.\n");
 }
 
-env* create_global_env() {
+static env* create_global_env() {
     env* env = env_create(NULL);
 
     val* fun_add = val_create_fun(builtin_add); env_put(env, "+", fun_add); val_free(fun_add);
@@ -29,8 +31,35 @@ env* create_global_env() {
     return env;
 }
 
-int main(int argc, char** argv) {
+static void completion(const char *buf, linenoiseCompletions *lc) {
+    const char* last_word = strrchr(buf, ' ');
+    if (!last_word) last_word = strrchr(buf, '('); 
+    
+    if (last_word) {
+        last_word++;
+    } else {
+        last_word = buf;
+    }
+    
+    int prefix_len = strlen(last_word);
+    if (prefix_len == 0) return;
 
+    env* e = global_env_ptr;
+    while (e != NULL) {
+        for (int i = 0; i < e->count; i++) {
+            if (strncmp(e->symbols[i], last_word, prefix_len) == 0) {
+                char completion_str[512];
+                int prefix_pos = last_word - buf;
+                snprintf(completion_str, sizeof(completion_str), "%.*s%s", 
+                         prefix_pos, buf, e->symbols[i]);
+                linenoiseAddCompletion(lc, completion_str);
+            }
+        }
+        e = e->parent;
+    }
+}
+
+int main(int argc, char** argv) {
     if (argc > 1) {
         if (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0) {
             print_help();
@@ -45,8 +74,9 @@ int main(int argc, char** argv) {
 
     char* line;
 
-    env* global_env = create_global_env();
-
+    global_env_ptr = create_global_env();
+    linenoiseSetCompletionCallback(completion); 
+    
     printf("\nLISP is running. CTRL+C to quit.\n\n");
     while ((line = linenoise("lisp> ")) != NULL) {
         if (line[0] != '\0') {
@@ -60,7 +90,7 @@ int main(int argc, char** argv) {
                 val_print(expr);
                 val_free(expr);
             } else {
-                val* result = val_eval(global_env, expr); 
+                val* result = val_eval(global_env_ptr, expr); 
 
                 val_print(result);
 
@@ -71,6 +101,6 @@ int main(int argc, char** argv) {
         free(line);
     }
 
-    env_free(global_env);
+    env_free(global_env_ptr);
     return 0;
 }
