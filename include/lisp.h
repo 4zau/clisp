@@ -4,6 +4,14 @@
 struct env;
 typedef struct env env;
 
+typedef struct lambda_cache {
+    int ref_count;
+    struct val** args;
+    struct val** vals;
+    int count;
+    int capacity;
+} lambda_cache;
+
 // val
 
 typedef enum {
@@ -31,6 +39,7 @@ typedef struct val {
             struct env* env;
             struct val* formals;
             struct val* body;
+            lambda_cache* cache; 
         } lambda;
     };
 } val;
@@ -52,6 +61,8 @@ void val_print(val* v);
 void val_free(val* v);
 
 val* val_copy(val* v);
+
+int val_eq(val* a, val* b);
 
 // environment
 

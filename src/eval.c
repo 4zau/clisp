@@ -119,19 +119,39 @@ val* val_eval(env* e, val* v) {
                 return given_args;
             }
 
-            env* call_env = env_create(f->lambda.env);
+            lambda_cache* cache = f->lambda.cache;
+            for (int i = 0; i < cache->count; i++) {
+                if (val_eq(given_args, cache->args[i])) {
+                    val* cached_res = val_copy(cache->vals[i]);
+                    
+                    val_free(given_args);
+                    val_free(f);
+                    return cached_res;
+                }
+            }
 
+            env* call_env = env_create(f->lambda.env);
             val* symbol_node = f->lambda.formals;
             val* val_node = given_args;
 
             while (symbol_node->type == VAL_CONS && val_node->type == VAL_CONS) {
                 env_put(call_env, symbol_node->car->symbol, val_node->car);
-                
                 symbol_node = symbol_node->cdr;
                 val_node = val_node->cdr;
             }
 
             val* result = val_eval(call_env, f->lambda.body);
+
+            if (result->type != VAL_ERR) {
+                if (cache->count >= cache->capacity) {
+                    cache->capacity *= 2;
+                    cache->args = realloc(cache->args, sizeof(val*) * cache->capacity);
+                    cache->vals = realloc(cache->vals, sizeof(val*) * cache->capacity);
+                }
+                cache->args[cache->count] = val_copy(given_args);
+                cache->vals[cache->count] = val_copy(result);
+                cache->count++;
+            }
 
             val_free(given_args);
             env_free(call_env);

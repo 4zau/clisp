@@ -1,7 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <linenoise.h>
+#include <string.h>
 #include "lisp.h"
+
+void print_help() {
+    printf("LISP interpreter in REPL mode\n\n");
+    printf("use 'def' to create variables or lambda functions.\n");
+}
 
 env* create_global_env() {
     env* env = env_create(NULL);
@@ -24,11 +30,24 @@ env* create_global_env() {
 }
 
 int main(int argc, char** argv) {
+
+    if (argc > 1) {
+        if (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0) {
+            print_help();
+            return 0;
+        } else {
+            printf("ERR: unknown argument '%s'\n", argv[1]);
+            printf("use lisp --help to get help\n");
+            return 1;
+        }
+    }
+
+
     char* line;
 
     env* global_env = create_global_env();
 
-    printf("LISP is running. ctrl+c to quit.\n\n");
+    printf("\nLISP is running. CTRL+C to quit.\n\n");
     while ((line = linenoise("lisp> ")) != NULL) {
         if (line[0] != '\0') {
             linenoiseHistoryAdd(line);
@@ -52,5 +71,6 @@ int main(int argc, char** argv) {
         free(line);
     }
 
+    env_free(global_env);
     return 0;
 }

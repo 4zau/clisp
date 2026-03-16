@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -g -I./include -I./libs
-TARGET = lisp
+TARGET = lisp.out
 
 all: $(TARGET)
 

@@ -3,6 +3,28 @@
 #include <string.h>
 #include "lisp.h"
 
+static lambda_cache* cache_create() {
+    lambda_cache* c = malloc(sizeof(lambda_cache));
+    c->ref_count = 1;
+    c->count = 0;
+    c->capacity = 10;
+    c->args = malloc(sizeof(val*) * c->capacity);
+    c->vals = malloc(sizeof(val*) * c->capacity);
+    return c;
+}
+
+static void cache_free(lambda_cache* c) {
+    c->ref_count--;
+    if (c->ref_count > 0) return;
+    
+    for (int i = 0; i < c->count; i++) {
+        val_free(c->args[i]);
+        val_free(c->vals[i]);
+    }
+    free(c->args);
+    free(c->vals);
+    free(c);
+}
 
 val* val_create_nil() {
     val* v = malloc(sizeof(val));
@@ -51,6 +73,7 @@ val* val_create_lambda(env* e, val* formals, val* body) {
     v->lambda.env = env_copy(e);
     v->lambda.formals = val_copy(formals);
     v->lambda.body = val_copy(body);
+    v->lambda.cache = cache_create();
     return v;
 }
 
@@ -92,16 +115,16 @@ void val_print(val* v) {
 }
 
 void val_free(val* v) {
-    if (v->type == VAL_SYMBOL) free(v->symbol);
-    if (v->type == VAL_ERR) free(v->err);
-    if (v->type == VAL_CONS) {
-        val_free(v->car);
-        val_free(v->cdr);
-    }
-    if (v->type == VAL_LAMBDA) {
-        val_free(v->lambda.formals);
-        val_free(v->lambda.body);
-        env_free(v->lambda.env);
+    switch (v->type) {
+        case VAL_SYMBOL: free(v->symbol); break;
+        case VAL_CONS: val_free(v->car); val_free(v->cdr); break;
+        case VAL_LAMBDA:
+            val_free(v->lambda.formals);
+            val_free(v->lambda.body);
+            env_free(v->lambda.env);
+            cache_free(v->lambda.cache);
+            break;
+        case VAL_ERR: free(v->err); break;
     }
     free(v);
 }
@@ -113,8 +136,28 @@ val* val_copy(val* v) {
         case VAL_SYMBOL: return val_create_symbol(v->symbol); break;
         case VAL_CONS: return val_create_cons(val_copy(v->car), val_copy(v->cdr)); break;
         case VAL_FUN: return val_create_fun(v->fun); break;
-        case VAL_LAMBDA: return val_create_lambda(v->lambda.env, v->lambda.formals, v->lambda.body); break;
+        case VAL_LAMBDA:
+            val* copy = malloc(sizeof(val));
+            copy->type = VAL_LAMBDA;
+            copy->lambda.env = env_copy(v->lambda.env);
+            copy->lambda.formals = val_copy(v->lambda.formals);
+            copy->lambda.body = val_copy(v->lambda.body);
+            copy->lambda.cache = v->lambda.cache;
+            copy->lambda.cache->ref_count++;
+            return copy; break;
         case VAL_ERR: return val_create_err(v->err); break;
     }
     return val_create_err("ERR: couldnt copy val");
+}
+
+int val_eq(val* a, val* b) {
+    if (a->type != b->type) return 0;
+    switch (a->type) {
+        case VAL_NIL: return 1;
+        case VAL_INT: return a->num == b->num;
+        case VAL_SYMBOL:
+        case VAL_ERR: return strcmp(a->symbol, b->symbol) == 0;
+        case VAL_CONS: return val_eq(a->car, b->car) && val_eq(a->cdr, b->cdr);
+        default: return 0;
+    }
 }
