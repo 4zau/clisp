@@ -75,6 +75,10 @@ val* val_eval(env* e, val* v) {
 
         if (f->type == VAL_FUN) {
             val* args = eval_args(e, v->cdr);
+            if (args->type == VAL_ERR) {
+                val_free(f);
+                return args;
+            }
             
             val* result = f->fun(e, args);
             
