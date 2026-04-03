@@ -3,7 +3,7 @@
 #include <string.h>
 #include "lisp.h"
 
-static val* builtin_math(env* e, val* args, const char* op) {
+static val* builtin_math(env* e, val* args, char* op) {
     val* curr = args;
     
     while (curr->type == VAL_CONS) {
@@ -46,7 +46,7 @@ val* builtin_mul(env* e, val* args) { return builtin_math(e, args, "*"); }
 val* builtin_div(env* e, val* args) { return builtin_math(e, args, "/"); }
 
 
-static val* builtin_cmp(env* e, val* args, const char* op) {
+static val* builtin_cmp(env* e, val* args, char* op) {
     if (args->type != VAL_CONS || args->cdr->type != VAL_CONS || args->cdr->cdr->type != VAL_NIL) {
         return val_create_err("ERR: comparison expects exactly 2 arguments");
     }

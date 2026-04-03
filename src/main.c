@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
         if (line[0] != '\0') {
             linenoiseHistoryAdd(line);
             
-            const char* str = line;
+            char* str = line;
 
             val* expr = val_read(&str);
 

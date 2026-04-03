@@ -38,7 +38,7 @@ val* val_create_int(long num) {
     v->num = num;
     return v;
 }
-val* val_create_symbol(const char* symbol) {
+val* val_create_symbol(char* symbol) {
     val* v = malloc(sizeof(val));
     v->type = VAL_SYMBOL;
     v->symbol = strdup(symbol);
@@ -60,7 +60,7 @@ val* val_create_fun(val* (*fun)(env*, val*)) {
     return v;
 }
 
-val* val_create_err(const char* err) {
+val* val_create_err(char* err) {
     val* v = malloc(sizeof(val));
     v->type = VAL_ERR;
     v->err = strdup(err);

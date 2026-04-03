@@ -46,13 +46,13 @@ typedef struct val {
 
 val* val_create_nil();
 val* val_create_int(long num);
-val* val_create_symbol(const char* symbol);
+val* val_create_symbol(char* symbol);
 val* val_create_cons(val* car, val* cdr);
-val* val_create_err(const char* err);
+val* val_create_err(char* err);
 val* val_create_fun(val* (*fun)(env*, val*));
 val* val_create_lambda(env* e, val* formals, val* body);
 
-val* val_read(const char** str);
+val* val_read(char** str);
 
 val* val_eval(env* e, val* v);
 
