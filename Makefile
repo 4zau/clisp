@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -g -I./include -I./libs
+CFLAGS = -O3 -Wall -Wextra -g -I./include -I./libs
 TARGET = lisp.out
 
 all: $(TARGET)

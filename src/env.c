@@ -37,6 +37,10 @@ void env_free(env* e) {
     }
     free(e->symbols); free(e->vals);
     free(e);
+
+    if (e->parent != NULL) {
+        env_free(e->parent); 
+    }
 }
 
 void env_put(env* e, char* symbol, val* v) {
@@ -58,7 +62,6 @@ void env_put(env* e, char* symbol, val* v) {
 }
 
 val* env_get(env* e, char* symbol) {
-    if (e->count == -1) return val_create_err("ERR: environment is empty");
     for (int i = 0; i < e->count; i++) {
         if (strcmp(symbol, e->symbols[i]) == 0) {
             return val_copy(e->vals[i]);

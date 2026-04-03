@@ -7,7 +7,7 @@
 static env* global_env_ptr = NULL;
 
 static void print_help() {
-    printf("LISP interpreter in REPL mode\n\n");
+    printf("LISP interpreter in REPL mode\n");
     printf("use 'def' to create variables or lambda functions.\n");
 }
 

@@ -140,6 +140,19 @@ val* val_eval(env* e, val* v) {
                 val_node = val_node->cdr;
             }
 
+            if (symbol_node->type != VAL_NIL) {
+                env_free(call_env);
+                val_free(f);
+                val_free(given_args);
+                return val_create_err("ERR: too few arguments provided to lambda");
+            }
+            if (val_node->type != VAL_NIL) {
+                env_free(call_env);
+                val_free(f);
+                val_free(given_args);
+                return val_create_err("ERR: too many arguments provided to lambda");
+            }
+
             val* result = val_eval(call_env, f->lambda.body);
 
             if (result->type != VAL_ERR) {
