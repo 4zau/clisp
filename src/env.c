@@ -36,11 +36,12 @@ void env_free(env* e) {
         free(e->symbols[i]); val_free(e->vals[i]);
     }
     free(e->symbols); free(e->vals);
-    free(e);
-
+    
     if (e->parent != NULL) {
         env_free(e->parent); 
     }
+    
+    free(e);
 }
 
 void env_put(env* e, char* symbol, val* v) {
