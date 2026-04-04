@@ -161,8 +161,10 @@ val* val_eval(env* e, val* v) {
                     cache->args = realloc(cache->args, sizeof(val*) * cache->capacity);
                     cache->vals = realloc(cache->vals, sizeof(val*) * cache->capacity);
                 }
+
                 cache->args[cache->count] = val_copy(given_args);
                 cache->vals[cache->count] = val_copy(result);
+
                 cache->count++;
             }
 

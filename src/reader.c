@@ -4,13 +4,13 @@
 #include <ctype.h>
 #include "lisp.h"
 
-static void skip_whitespaces(const char** str) {
+static void skip_whitespaces(char** str) {
     while (isspace(**str)) {
         (*str)++;
     }
 }
 
-static val* read_list(const char** str) {
+static val* read_list(char** str) {
     skip_whitespaces(str);
 
     if (**str == '\0') {
@@ -38,7 +38,7 @@ static val* read_list(const char** str) {
     return val_create_cons(car, cdr);
 }
 
-static val* read_atom(const char** str) {
+static val* read_atom(char** str) {
     char buffer[256];
     int i = 0;
 
@@ -60,7 +60,7 @@ static val* read_atom(const char** str) {
     }
 }
 
-val* val_read(const char** str) {
+val* val_read(char** str) {
     skip_whitespaces(str);
 
     if (**str == '\0') {
