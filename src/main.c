@@ -9,6 +9,7 @@ static env* global_env_ptr = NULL;
 static void print_help() {
     printf("LISP interpreter in REPL mode\n");
     printf("use 'def' to create variables or lambda functions.\n");
+    printf("example: (def fib (lambda (n) (if (< n 2) n (+ (fib (- n 1)) (fib (- n 2))))))\n");
 }
 
 static env* create_global_env() {
@@ -75,7 +76,7 @@ int main(int argc, char** argv) {
     char* line;
 
     global_env_ptr = create_global_env();
-    linenoiseSetCompletionCallback(completion); 
+    linenoiseSetCompletionCallback(completion);  
     
     printf("\nLISP is running. CTRL+C to quit.\n\n");
     while ((line = linenoise("lisp> ")) != NULL) {
