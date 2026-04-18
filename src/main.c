@@ -14,6 +14,7 @@ static void print_help() {
     printf("use 'def' to create variables or lambda functions (lambda! for no cache).\n");
     printf("example: (def fib (lambda (n) (if (< n 2) n (+ (fib (- n 1)) (fib (- n 2))))))\n");
     printf("use ':l <filename>' to load and run a script file.\n");
+    printf("use ':p <path to plugin>' to load a plugin.\n");
 }
 
 static env* create_global_env() {
