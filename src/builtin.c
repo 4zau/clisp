@@ -53,6 +53,11 @@ static val* builtin_cmp(env* e, val* args, char* op) {
     
     val* a = args->car;
     val* b = args->cdr->car;
+
+    if (strcmp(op, "=") == 0 && a->type == VAL_STRING && b->type == VAL_STRING) {
+        if (strcmp(a->string, b->string) == 0) return val_create_symbol("T");
+        else return val_create_nil();
+    }
     
     if (a->type != VAL_INT || b->type != VAL_INT) {
         return val_create_err("ERR: comparison expects numbers");
@@ -103,4 +108,34 @@ val* builtin_cons(env* e, val* args) {
         return val_create_err("ERR: 'cons' expects exactly 2 arguments");
     
     return val_create_cons(val_copy(args->car), val_copy(args->cdr->car));
+}
+
+val* builtin_print(env* e, val* args) {
+    val* curr = args;
+    while (curr->type == VAL_CONS) {
+        if (curr->car->type == VAL_STRING) {
+            printf("%s\n", curr->car->string);
+        } else {
+            val_print(curr->car);
+        }
+        curr = curr->cdr;
+    }
+    return val_create_nil();
+}
+
+val* builtin_load_plugin(env* e, val* args) {
+    if (args->type != VAL_CONS || args->cdr->type != VAL_NIL) {
+        return val_create_err("ERR: 'load-plugin' expects exactly 1 argument");
+    }
+    if (args->car->type != VAL_STRING) {
+        return val_create_err("ERR: 'load-plugin' expects a string (path to .so)");
+    }
+    
+    if (load_plugin(e, args->car->string) != 0) {
+        char err_buf[512];
+        snprintf(err_buf, sizeof(err_buf), "ERR: Failed to load plugin from path '%s'", args->car->string);
+        return val_create_err(err_buf);
+    }
+    
+    return val_create_nil();
 }

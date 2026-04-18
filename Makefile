@@ -1,8 +1,8 @@
 CC = gcc
-CFLAGS = -O3 -Wall -Wextra -g -I./include -I./libs
+CFLAGS = -O3 -Wall -Wextra -g -I./include -I./libs -rdynamic -ldl
 TARGET = lisp.out
 
-LISP_SRCS = src/val.c src/reader.c src/env.c src/eval.c src/builtin.c src/main.c
+LISP_SRCS = src/val.c src/reader.c src/env.c src/eval.c src/builtin.c src/main.c src/external.c
 LIB_SRCS = libs/linenoise.c
 
 LISP_OBJS = $(LISP_SRCS:.c=.o)

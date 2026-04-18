@@ -2,14 +2,18 @@
 #include <stdlib.h>
 #include <linenoise.h>
 #include <string.h>
+#include <ctype.h>
 #include "lisp.h"
 
 static env* global_env_ptr = NULL;
 
 static void print_help() {
     printf("LISP interpreter in REPL mode\n");
-    printf("use 'def' to create variables or lambda functions.\n");
+    printf("lisp [file] to run a script\n");
+    printf("lisp -p [lib.so] to start with a plugin\n");
+    printf("use 'def' to create variables or lambda functions (lambda! for no cache).\n");
     printf("example: (def fib (lambda (n) (if (< n 2) n (+ (fib (- n 1)) (fib (- n 2))))))\n");
+    printf("use ':l <filename>' to load and run a script file.\n");
 }
 
 static env* create_global_env() {
@@ -28,6 +32,10 @@ static env* create_global_env() {
     val* fun_car = val_create_fun(builtin_car); env_put(env, "car", fun_car); val_free(fun_car);
     val* fun_cdr = val_create_fun(builtin_cdr); env_put(env, "cdr", fun_cdr); val_free(fun_cdr);
     val* fun_cons = val_create_fun(builtin_cons); env_put(env, "cons", fun_cons); val_free(fun_cons);
+
+    val* fun_print = val_create_fun(builtin_print); env_put(env, "print", fun_print); val_free(fun_print);
+
+    val* fun_load = val_create_fun(builtin_load_plugin); env_put(env, "load-plugin", fun_load); val_free(fun_load);
 
     return env;
 }
@@ -61,47 +69,90 @@ static void completion(const char *buf, linenoiseCompletions *lc) {
 }
 
 int main(int argc, char** argv) {
-    if (argc > 1) {
-        if (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0) {
+    global_env_ptr = create_global_env();
+
+    const char* file_to_run = NULL;
+    int repl_mode = 1;
+
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
             print_help();
+            env_free(global_env_ptr);
             return 0;
-        } else {
-            printf("ERR: unknown argument '%s'\n", argv[1]);
-            printf("use lisp --help to get help\n");
+        } else if (strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "--plugin") == 0) {
+            if (i + 1 < argc) {
+                if (load_plugin(global_env_ptr, argv[++i]) != 0) {
+                    env_free(global_env_ptr);
+                    return 1;
+                }
+            } else {
+                fprintf(stderr, "ERR: -p/--plugin requires a library path\n");
+                return 1;
+            }
+        } else if (argv[i][0] == '-') {
+            fprintf(stderr, "ERR: unknown argument '%s'\n", argv[i]);
             return 1;
+        } else {
+            file_to_run = argv[i];
+            repl_mode = 0;
         }
     }
-
-
-    char* line;
-
-    global_env_ptr = create_global_env();
-    linenoiseSetCompletionCallback(completion);  
     
-    printf("\nLISP is running. CTRL+C to quit.\n\n");
-    while ((line = linenoise("lisp> ")) != NULL) {
-        if (line[0] != '\0') {
-            linenoiseHistoryAdd(line);
-            
-            char* str = line;
+    if (repl_mode) {
+        linenoiseSetCompletionCallback(completion); 
+        printf("\nLISP is running. CTRL+C to quit.\n\n");
+        
+        char* line;
+        while ((line = linenoise("lisp> ")) != NULL) {
+            if (line[0] != '\0') {
+                linenoiseHistoryAdd(line);
 
-            val* expr = val_read(&str);
+                if (strncmp(line, ":l ", 3) == 0) {
+                    const char* filename = line + 3;
+                    while (isspace(*filename)) filename++;
 
-            if (expr->type == VAL_ERR) {
-                val_print(expr);
-                val_free(expr);
-            } else {
-                val* result = val_eval(global_env_ptr, expr); 
+                    if (*filename == '\0') {
+                        printf("ERR: expected filename after ':l'\n");
+                    } else {
+                        if (run_file(global_env_ptr, filename) == 0) {
+                            printf("loaded '%s' successfully.\n", filename);
+                        } else {
+                            printf("execution of '%s' aborted due to errors.\n", filename);
+                        }
+                    }
+                }
+                else if (strncmp(line, ":p ", 3) == 0) {
+                    const char* plugin_path = line + 3;
+                    while (isspace(*plugin_path)) plugin_path++;
 
-                val_print(result);
+                    if (*plugin_path == '\0') {
+                        printf("ERR: expected library path after ':p'\n");
+                    } else {
+                        load_plugin(global_env_ptr, plugin_path);
+                    }
+                }
+                else {
+                    char* str = line;
+                    val* expr = val_read(&str);
 
-                val_free(expr);
-                val_free(result);
+                    if (expr->type == VAL_ERR) {
+                        val_print(expr);
+                        val_free(expr);
+                    } else {
+                        val* result = val_eval(global_env_ptr, expr); 
+                        val_print(result);
+                        val_free(expr);
+                        val_free(result);
+                    }
+                }
             }
+            free(line);
         }
-        free(line);
+    } else {
+        run_file(global_env_ptr, file_to_run);
     }
 
     env_free(global_env_ptr);
+    cleanup_plugins();
     return 0;
 }

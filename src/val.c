@@ -7,9 +7,9 @@ static lambda_cache* cache_create() {
     lambda_cache* c = malloc(sizeof(lambda_cache));
     c->ref_count = 1;
     c->count = 0;
-    c->capacity = 10;
-    c->args = malloc(sizeof(val*) * c->capacity);
-    c->vals = malloc(sizeof(val*) * c->capacity);
+    c->head = 0;
+    c->args = malloc(sizeof(val*) * MAX_CACHE_SIZE);
+    c->vals = malloc(sizeof(val*) * MAX_CACHE_SIZE);
     return c;
 }
 
@@ -45,6 +45,13 @@ val* val_create_symbol(char* symbol) {
     return v;
 }
 
+val* val_create_string(char* string) {
+    val* v = malloc(sizeof(val));
+    v->type = VAL_STRING;
+    v->string = strdup(string);
+    return v;
+}
+
 val* val_create_cons(val* car, val* cdr) {
     val* v = malloc(sizeof(val));
     v->type = VAL_CONS;
@@ -67,13 +74,13 @@ val* val_create_err(char* err) {
     return v;
 }
 
-val* val_create_lambda(env* e, val* formals, val* body) {
+val* val_create_lambda(env* e, val* formals, val* body, int is_pure) {
     val* v = malloc(sizeof(val));
     v->type = VAL_LAMBDA;
     v->lambda.env = env_copy(e);
     v->lambda.formals = val_copy(formals);
     v->lambda.body = val_copy(body);
-    v->lambda.cache = cache_create();
+    v->lambda.cache = is_pure ? cache_create() : NULL;
     return v;
 }
 
@@ -98,6 +105,7 @@ static void val_print_expr(val* v) {
         case VAL_NIL: printf("NIL"); break;
         case VAL_INT: printf("%ld", v->num); break;
         case VAL_SYMBOL: printf("%s", v->symbol); break;
+        case VAL_STRING: printf("\"%s\"", v->string); break; 
         case VAL_CONS:
             printf("(");
             val_print_cons(v);
@@ -117,12 +125,13 @@ void val_print(val* v) {
 void val_free(val* v) {
     switch (v->type) {
         case VAL_SYMBOL: free(v->symbol); break;
+        case VAL_STRING: free(v->string); break;
         case VAL_CONS: val_free(v->car); val_free(v->cdr); break;
         case VAL_LAMBDA:
             val_free(v->lambda.formals);
             val_free(v->lambda.body);
             env_free(v->lambda.env);
-            cache_free(v->lambda.cache);
+            if (v->lambda.cache) cache_free(v->lambda.cache); 
             break;
         case VAL_ERR: free(v->err); break;
     }
@@ -134,6 +143,7 @@ val* val_copy(val* v) {
         case VAL_NIL: return val_create_nil(); break;
         case VAL_INT: return val_create_int(v->num); break;
         case VAL_SYMBOL: return val_create_symbol(v->symbol); break;
+        case VAL_STRING: return val_create_string(v->string); break;
         case VAL_CONS: return val_create_cons(val_copy(v->car), val_copy(v->cdr)); break;
         case VAL_FUN: return val_create_fun(v->fun); break;
         case VAL_LAMBDA:
@@ -143,7 +153,7 @@ val* val_copy(val* v) {
             copy->lambda.formals = val_copy(v->lambda.formals);
             copy->lambda.body = val_copy(v->lambda.body);
             copy->lambda.cache = v->lambda.cache;
-            copy->lambda.cache->ref_count++;
+            if (copy->lambda.cache) copy->lambda.cache->ref_count++;
             return copy; break;
         case VAL_ERR: return val_create_err(v->err); break;
     }
@@ -156,6 +166,7 @@ int val_eq(val* a, val* b) {
         case VAL_NIL: return 1;
         case VAL_INT: return a->num == b->num;
         case VAL_SYMBOL:
+        case VAL_STRING: 
         case VAL_ERR: return strcmp(a->symbol, b->symbol) == 0;
         case VAL_CONS: return val_eq(a->car, b->car) && val_eq(a->cdr, b->cdr);
         default: return 0;

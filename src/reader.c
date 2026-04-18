@@ -10,6 +10,29 @@ static void skip_whitespaces(char** str) {
     }
 }
 
+static val* read_string(char** str) {
+    (*str)++;
+    
+    char buffer[2048];
+    int i = 0;
+    
+    while (**str != '\0' && **str != '"') {
+        if (i < 2047) {
+            buffer[i++] = **str;
+        }
+        (*str)++;
+    }
+    
+    if (**str == '"') {
+        (*str)++;
+    } else {
+        return val_create_err("ERR: unclosed string");
+    }
+    
+    buffer[i] = '\0';
+    return val_create_string(buffer);
+}
+
 static val* read_list(char** str) {
     skip_whitespaces(str);
 
@@ -75,6 +98,10 @@ val* val_read(char** str) {
     if (**str == ')') {
         (*str)++;
         return val_create_err("ERR: unexpected ')'");
+    }
+
+    if (**str == '"') {
+        return read_string(str);
     }
 
     return read_atom(str);

@@ -22,6 +22,7 @@ static val* eval_args(env* e, val* args) {
 
 val* val_eval(env* e, val* v) {
     if (v->type == VAL_INT) return val_create_int(v->num);
+    if (v->type == VAL_STRING) return val_create_string(v->string);
     if (v->type == VAL_ERR) return val_create_err(v->err);
     if (v->type == VAL_NIL) return val_create_nil();
     
@@ -57,6 +58,7 @@ val* val_eval(env* e, val* v) {
             return val_create_nil();
         }
 
+        // with cache
         if (first->type == VAL_SYMBOL && strcmp(first->symbol, "lambda") == 0) {
             val* args = v->cdr;
             
@@ -67,7 +69,17 @@ val* val_eval(env* e, val* v) {
             val* formals = args->car;
             val* body = args->cdr->car;
             
-            return val_create_lambda(e, formals, body);
+            return val_create_lambda(e, args->car, args->cdr->car, 1); 
+        }
+
+        // no cache
+        if (first->type == VAL_SYMBOL && strcmp(first->symbol, "lambda!") == 0) {
+            val* args = v->cdr;
+            if (args->type != VAL_CONS || args->cdr->type != VAL_CONS) {
+                return val_create_err("ERR: 'lambda!' expects arguments and a body");
+            }
+            
+            return val_create_lambda(e, args->car, args->cdr->car, 0);
         }
 
         if (first->type == VAL_SYMBOL && strcmp(first->symbol, "if") == 0) {
@@ -120,13 +132,15 @@ val* val_eval(env* e, val* v) {
             }
 
             lambda_cache* cache = f->lambda.cache;
-            for (int i = 0; i < cache->count; i++) {
-                if (val_eq(given_args, cache->args[i])) {
-                    val* cached_res = val_copy(cache->vals[i]);
-                    
-                    val_free(given_args);
-                    val_free(f);
-                    return cached_res;
+            if (cache != NULL) { 
+                for (int i = 0; i < cache->count; i++) {
+                    if (val_eq(given_args, cache->args[i])) {
+                        val* cached_res = val_copy(cache->vals[i]);
+                        
+                        val_free(given_args);
+                        val_free(f);
+                        return cached_res;
+                    }
                 }
             }
 
@@ -155,17 +169,20 @@ val* val_eval(env* e, val* v) {
 
             val* result = val_eval(call_env, f->lambda.body);
 
-            if (result->type != VAL_ERR) {
-                if (cache->count >= cache->capacity) {
-                    cache->capacity *= 2;
-                    cache->args = realloc(cache->args, sizeof(val*) * cache->capacity);
-                    cache->vals = realloc(cache->vals, sizeof(val*) * cache->capacity);
+            if (result->type != VAL_ERR && cache != NULL) {
+                int idx = cache->head;
+
+                if (cache->count == MAX_CACHE_SIZE) {
+                    val_free(cache->args[idx]);
+                    val_free(cache->vals[idx]);
+                } else {
+                    cache->count++;
                 }
 
-                cache->args[cache->count] = val_copy(given_args);
-                cache->vals[cache->count] = val_copy(result);
-
-                cache->count++;
+                cache->args[idx] = val_copy(given_args);
+                cache->vals[idx] = val_copy(result);
+                
+                cache->head = (cache->head + 1) % MAX_CACHE_SIZE;
             }
 
             val_free(given_args);
