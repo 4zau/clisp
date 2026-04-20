@@ -33,5 +33,5 @@ void lisp_plugin_init(env* e) {
     env_put(e, "pow", fun_pow);
     val_free(fun_pow);
     
-    printf("added function: 'pow'\n");
+    printf("successfully added function: 'pow'\n");
 }

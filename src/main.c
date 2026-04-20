@@ -24,6 +24,7 @@ static env* create_global_env() {
     val* fun_sub = val_create_fun(builtin_sub); env_put(env, "-", fun_sub); val_free(fun_sub);
     val* fun_mul = val_create_fun(builtin_mul); env_put(env, "*", fun_mul); val_free(fun_mul);
     val* fun_div = val_create_fun(builtin_div); env_put(env, "/", fun_div); val_free(fun_div);
+    val* fun_mod = val_create_fun(builtin_mod); env_put(env, "%", fun_mod); val_free(fun_mod);
 
     val* fun_eq = val_create_fun(builtin_eq); env_put(env, "=", fun_eq); val_free(fun_eq);
     val* fun_gt = val_create_fun(builtin_gt); env_put(env, ">", fun_gt); val_free(fun_gt);
@@ -33,6 +34,10 @@ static env* create_global_env() {
     val* fun_car = val_create_fun(builtin_car); env_put(env, "car", fun_car); val_free(fun_car);
     val* fun_cdr = val_create_fun(builtin_cdr); env_put(env, "cdr", fun_cdr); val_free(fun_cdr);
     val* fun_cons = val_create_fun(builtin_cons); env_put(env, "cons", fun_cons); val_free(fun_cons);
+
+    val* fun_not = val_create_fun(builtin_not); env_put(env, "not", fun_not); val_free(fun_not);
+    val* fun_is_nil = val_create_fun(builtin_is_nil); env_put(env, "is_nil", fun_is_nil); val_free(fun_is_nil);
+    val* fun_return_nil = val_create_fun(builtin_return_nil); env_put(env, "return_nil", fun_return_nil); val_free(fun_return_nil);
 
     val* fun_print = val_create_fun(builtin_print); env_put(env, "print", fun_print); val_free(fun_print);
 

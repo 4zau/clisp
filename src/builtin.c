@@ -35,6 +35,7 @@ static val* builtin_math(env* e, val* args, char* op) {
             if (next_val == 0) return val_create_err("ERR: division by zero");
             result /= next_val;
         }
+        else if (strcmp(op, "%") == 0) result = result % next_val;
         curr = curr->cdr;
     }
     return val_create_int(result);
@@ -44,6 +45,7 @@ val* builtin_add(env* e, val* args) { return builtin_math(e, args, "+"); }
 val* builtin_sub(env* e, val* args) { return builtin_math(e, args, "-"); }
 val* builtin_mul(env* e, val* args) { return builtin_math(e, args, "*"); }
 val* builtin_div(env* e, val* args) { return builtin_math(e, args, "/"); }
+val* builtin_mod(env* e, val* args) { return builtin_math(e, args, "%"); }
 
 
 static val* builtin_cmp(env* e, val* args, char* op) {
@@ -137,5 +139,33 @@ val* builtin_load_plugin(env* e, val* args) {
         return val_create_err(err_buf);
     }
     
+    return val_create_nil();
+}
+
+val* builtin_not(env* e, val* args) {
+    if (args->type != VAL_CONS || args->cdr->type != VAL_NIL) {
+        return val_create_err("ERR: 'not' expects exactly 1 argument");
+    }
+
+    if (args->car->type != VAL_NIL) {
+        return val_create_nil();
+    }
+
+    return val_create_symbol("T");
+}
+
+val* builtin_is_nil(env* e, val* args) {
+    if (args->type != VAL_CONS || args->cdr->type != VAL_NIL) {
+        return val_create_err("ERR: 'is_nil' expects exactly 1 argument");
+    }
+
+    if (args->car->type == VAL_NIL) {
+        return val_create_symbol("T");
+    }
+
+    return val_create_nil();
+}
+
+val* builtin_return_nil(env* e, val* args) {
     return val_create_nil();
 }

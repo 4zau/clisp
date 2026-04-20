@@ -107,6 +107,24 @@ val* val_eval(env* e, val* v) {
             }
         }
 
+        if (first->type == VAL_SYMBOL && strcmp(first->symbol, "exists") == 0) {
+            val* args = v->cdr;
+            if (args->type != VAL_CONS || args->cdr->type != VAL_NIL) {
+                return val_create_err("ERR: 'exists' expects exactly 1 arguments");
+            }
+            
+            if (args->car->type != VAL_SYMBOL) {
+                return val_create_err("ERR: 'exists' expects a symbol");
+            }
+
+            val* car = args->car;
+            
+            if (env_get(e, car->symbol)->type == VAL_ERR) {
+                return val_create_nil();
+            }
+            return val_create_symbol("T");
+        }
+
         val* f = val_eval(e, first);
         if (f->type == VAL_ERR) return f;
 

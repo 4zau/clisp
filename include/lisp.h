@@ -95,6 +95,7 @@ val* builtin_add(env* e, val* args);
 val* builtin_sub(env* e, val* args);
 val* builtin_mul(env* e, val* args);
 val* builtin_div(env* e, val* args);
+val* builtin_mod(env* e, val* args);
 
 val* builtin_eq(env* e, val* args);
 val* builtin_gt(env* e, val* args);
@@ -104,6 +105,10 @@ val* builtin_list(env* e, val* args);
 val* builtin_car(env* e, val* args);
 val* builtin_cdr(env* e, val* args);
 val* builtin_cons(env* e, val* args);
+
+val* builtin_not(env* e, val* args);
+val* builtin_is_nil(env* e, val* args);
+val* builtin_return_nil(env* e, val* args);
 
 val* builtin_print(env* e, val* args);
 
