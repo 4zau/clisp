@@ -58,7 +58,7 @@ int run_file(env* e, const char* filename) {
     buffer[length] = '\0';
     fclose(f);
 
-    const char* str = buffer;
+    char* str = buffer;
     int exit_code = 0;
     
     while (*str != '\0') {
