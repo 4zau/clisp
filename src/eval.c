@@ -118,8 +118,12 @@ val* val_eval(env* e, val* v) {
             }
 
             val* car = args->car;
+    
+            val* fetched = env_get(e, car->symbol);
+            int is_err = (fetched->type == VAL_ERR);
+            val_free(fetched);
             
-            if (env_get(e, car->symbol)->type == VAL_ERR) {
+            if (is_err) {
                 return val_create_nil();
             }
             return val_create_symbol("T");
