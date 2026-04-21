@@ -10,6 +10,8 @@
 (def score 0)
 (def lives 3)
 
+(def caught-colors ()) 
+
 ; player
 (def px 350) (def py 520) (def pw 100) (def ph 20) (def p-speed 12)
 
@@ -37,6 +39,7 @@
 
 ; since im too lazy to add raylib's text drawing, 
 ; we resort to drawing lives and score with cubes
+; its cooler anyway
 (def draw-lives (lambda! (l x)
     (if (> l 0)
         (begin
@@ -47,20 +50,24 @@
 ))
 
 ; same
-(def draw-score (lambda! (s x y)
-    (if (> s 0)
+; we remember colors caught to show them at score screen
+(def draw-score (lambda! (lst x y)
+    (if (is_nil lst)
+        ()
         (begin
-            (rl-draw-rect x y 10 20  250 200 50 255)
+            (rl-draw-rect x y 10 20 
+                (car (car lst))                   ; red
+                (car (cdr (car lst)))             ; green
+                (car (cdr (cdr (car lst))))       ; blue
+                255)
+
             (if (> x (- screen-w 30))
-                ; wrap around
-                (draw-score (- s 1) 10 (+ y 30))
-                (draw-score (- s 1) (+ x 15) y)
+                (draw-score (cdr lst) 10 (+ y 30))
+                (draw-score (cdr lst) (+ x 15) y)
             )
         )
-        NIL)
+    )
 ))
-
-; its cooler anyway
 
 (def update-playing (lambda! ()
     (begin
@@ -71,6 +78,7 @@
 
         (if (check-collision)
             (begin
+                (set! caught-colors (cons (list cr cg cb) caught-colors))
                 (reset-cube)
                 (set! c-speed (+ c-speed 1))
                 (set! score (+ score 1))
@@ -111,6 +119,7 @@
                 (set! score 0)
                 (set! lives 3)
                 (set! c-speed 4)
+                (set! caught-colors ())
                 (reset-cube)
                 (print "restarted!")
             )
@@ -118,7 +127,7 @@
 
         (rl-clear 100 30 30 255)
         
-        (draw-score score 20 100)
+        (draw-score caught-colors 20 100)
     )
 ))
 
