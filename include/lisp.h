@@ -110,7 +110,6 @@ val* builtin_cons(env* e, val* args);
 
 val* builtin_not(env* e, val* args);
 val* builtin_is_nil(env* e, val* args);
-val* builtin_return_nil(env* e, val* args);
 
 val* builtin_print(env* e, val* args);
 

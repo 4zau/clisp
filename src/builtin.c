@@ -165,7 +165,3 @@ val* builtin_is_nil(env* e, val* args) {
 
     return val_create_nil();
 }
-
-val* builtin_return_nil(env* e, val* args) {
-    return val_create_nil();
-}

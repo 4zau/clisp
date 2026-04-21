@@ -38,7 +38,6 @@ static env* create_global_env() {
 
     val* fun_not = val_create_fun(builtin_not); env_put(env, "not", fun_not); val_free(fun_not);
     val* fun_is_nil = val_create_fun(builtin_is_nil); env_put(env, "is_nil", fun_is_nil); val_free(fun_is_nil);
-    val* fun_return_nil = val_create_fun(builtin_return_nil); env_put(env, "return-nil", fun_return_nil); val_free(fun_return_nil);
 
     val* fun_print = val_create_fun(builtin_print); env_put(env, "print", fun_print); val_free(fun_print);
 

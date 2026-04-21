@@ -1,7 +1,7 @@
 (print "loading random module...")
 (load-plugin "./plugins/random.so")
 
-(if (exists goal) (return_nil) (def goal (% (get_random) 100)))
+(if (exists goal) () (def goal (% (get_random) 100)))
 (print "goal exists")
 
 ; this was written before I made io.c
