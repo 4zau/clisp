@@ -58,6 +58,23 @@ val* val_eval(env* e, val* v) {
             return val_create_nil();
         }
 
+        if (first->type == VAL_SYMBOL && strcmp(first->symbol, "set!") == 0) {
+            val* args = v->cdr; 
+            if (args->type != VAL_CONS || args->cdr->type != VAL_CONS) {
+                return val_create_err("ERR: 'set!' expects exactly 2 arguments");
+            }
+            if (args->car->type != VAL_SYMBOL) {
+                return val_create_err("ERR: 'set!' expects a symbol");
+            }
+
+            val* var_value = val_eval(e, args->cdr->car);
+            if (var_value->type == VAL_ERR) return var_value;
+            
+            val* res = env_set(e, args->car->symbol, var_value);
+            val_free(var_value);
+            return res;
+        }
+
         // with cache
         if (first->type == VAL_SYMBOL && strcmp(first->symbol, "lambda") == 0) {
             val* args = v->cdr;

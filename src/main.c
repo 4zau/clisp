@@ -12,6 +12,7 @@ static void print_help() {
     printf("lisp [file] to run a script\n");
     printf("lisp -p [lib.so] to start with a plugin\n");
     printf("use 'def' to create variables or lambda functions (lambda! for no cache).\n");
+    printf("use 'set!' to update existing global variables.\n");
     printf("example: (def fib (lambda (n) (if (< n 2) n (+ (fib (- n 1)) (fib (- n 2))))))\n");
     printf("use ':l <filename>' to load and run a script file.\n");
     printf("use ':p <path to plugin>' (or load-plugin) to load a plugin.\n");
@@ -37,7 +38,7 @@ static env* create_global_env() {
 
     val* fun_not = val_create_fun(builtin_not); env_put(env, "not", fun_not); val_free(fun_not);
     val* fun_is_nil = val_create_fun(builtin_is_nil); env_put(env, "is_nil", fun_is_nil); val_free(fun_is_nil);
-    val* fun_return_nil = val_create_fun(builtin_return_nil); env_put(env, "return_nil", fun_return_nil); val_free(fun_return_nil);
+    val* fun_return_nil = val_create_fun(builtin_return_nil); env_put(env, "return-nil", fun_return_nil); val_free(fun_return_nil);
 
     val* fun_print = val_create_fun(builtin_print); env_put(env, "print", fun_print); val_free(fun_print);
 
@@ -139,16 +140,20 @@ int main(int argc, char** argv) {
                 }
                 else {
                     char* str = line;
-                    val* expr = val_read(&str);
+                    skip_space_and_comments(&str); 
 
-                    if (expr->type == VAL_ERR) {
-                        val_print(expr);
-                        val_free(expr);
-                    } else {
-                        val* result = val_eval(global_env_ptr, expr); 
-                        val_print(result);
-                        val_free(expr);
-                        val_free(result);
+                    if (*str != '\0') {
+                        val* expr = val_read(&str);
+
+                        if (expr->type == VAL_ERR) {
+                            val_print(expr);
+                            val_free(expr);
+                        } else {
+                            val* result = val_eval(global_env_ptr, expr); 
+                            val_print(result);
+                            val_free(expr);
+                            val_free(result);
+                        }
                     }
                 }
             }

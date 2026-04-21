@@ -4,9 +4,17 @@
 #include <ctype.h>
 #include "lisp.h"
 
-static void skip_whitespaces(char** str) {
-    while (isspace(**str)) {
-        (*str)++;
+void skip_space_and_comments(char** str) {
+    while (**str != '\0') {
+        if (isspace(**str)) {
+            (*str)++;
+        } else if (**str == ';') {
+            while (**str != '\n' && **str != '\0') {
+                (*str)++;
+            }
+        } else {
+            break;
+        }
     }
 }
 
@@ -34,7 +42,7 @@ static val* read_string(char** str) {
 }
 
 static val* read_list(char** str) {
-    skip_whitespaces(str);
+    skip_space_and_comments(str);
 
     if (**str == '\0') {
         return val_create_err("ERR: unclosed list (missing ')')");
@@ -65,7 +73,7 @@ static val* read_atom(char** str) {
     char buffer[256];
     int i = 0;
 
-    while (**str != '\0' && !isspace(**str) && **str != '(' && **str != ')') {
+    while (**str != '\0' && !isspace(**str) && **str != '(' && **str != ')' && **str != ';') {
         if (i < 255) {
             buffer[i++] = **str;
         }
@@ -84,7 +92,7 @@ static val* read_atom(char** str) {
 }
 
 val* val_read(char** str) {
-    skip_whitespaces(str);
+    skip_space_and_comments(str);
 
     if (**str == '\0') {
         return val_create_err("ERR: unexpected EOL");

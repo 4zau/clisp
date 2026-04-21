@@ -62,6 +62,24 @@ void env_put(env* e, char* symbol, val* v) {
     e->count++;
 }
 
+val* env_set(env* e, char* symbol, val* v) {
+    for (int i = 0; i < e->count; i++) {
+        if (strcmp(symbol, e->symbols[i]) == 0) {
+            val_free(e->vals[i]);
+            e->vals[i] = val_copy(v);
+            return val_create_nil();
+        }
+    }
+    
+    if (e->parent != NULL) {
+        return env_set(e->parent, symbol, v);
+    }
+    
+    char buffer[256];
+    snprintf(buffer, 256, "ERR: cannot set! undefined variable '%s'", symbol);
+    return val_create_err(buffer);
+}
+
 val* env_get(env* e, char* symbol) {
     for (int i = 0; i < e->count; i++) {
         if (strcmp(symbol, e->symbols[i]) == 0) {

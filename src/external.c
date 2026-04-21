@@ -62,7 +62,7 @@ int run_file(env* e, const char* filename) {
     int exit_code = 0;
     
     while (*str != '\0') {
-        while (isspace(*str)) str++;
+        skip_space_and_comments(&str); 
         if (*str == '\0') break;
 
         val* expr = val_read(&str);

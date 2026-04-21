@@ -57,6 +57,7 @@ val* val_create_err(char* err);
 val* val_create_fun(val* (*fun)(env*, val*));
 val* val_create_lambda(env* e, val* formals, val* body, int is_pure);
 
+void skip_space_and_comments(char** str);
 val* val_read(char** str);
 
 val* val_eval(env* e, val* v);
@@ -88,6 +89,7 @@ void env_free(env* e);
 val* env_get(env* e, char* symbol);
 
 void env_put(env* e, char* symbol, val* v);
+val* env_set(env* e, char* symbol, val* v);
 
 // builtin
 
