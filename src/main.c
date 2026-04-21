@@ -158,9 +158,6 @@ int main(int argc, char** argv) {
         run_file(global_env_ptr, file_to_run);
     }
 
-    if (repl_mode) {
-        linenoiseHistoryFree();
-    }
     for (int i = 0; i < global_env_ptr->count; i++) {
         free(global_env_ptr->symbols[i]);
         val_free(global_env_ptr->vals[i]);
