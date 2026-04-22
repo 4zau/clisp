@@ -1,7 +1,9 @@
-#include <raylib.h>
+#include "raylib.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "lisp.h"
+
+// build with gcc -shared -fPIC raylib.c -o raylib.so libraylib.a -I../include -lGL -lm -lpthread -ldl -lrt -lX11
 
 long get_int(val** curr) {
     if (!*curr || (*curr)->type != VAL_CONS || (*curr)->car->type != VAL_INT) return 0;
