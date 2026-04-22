@@ -10,7 +10,7 @@
       (begin
         (set! energy (- energy 2))
         (set! hunger (+ hunger 3))
-        (print "you played with the pet!")s))))
+        (print "you played with the pet!")))))
 
 (def feed-pet (lambda! ()
   (begin
