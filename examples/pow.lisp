@@ -1,5 +1,5 @@
 (print "loading pow module...")
-(load-plugin "../plugins/pow.so")
+(load-plugin "./plugins/pow.so")
 
 (print "--- test power function ---")
 (def a (pow 2 10))
