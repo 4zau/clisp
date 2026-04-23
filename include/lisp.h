@@ -91,6 +91,8 @@ val* env_get(env* e, char* symbol);
 void env_put(env* e, char* symbol, val* v);
 val* env_set(env* e, char* symbol, val* v);
 
+void bind_func(env* e, char* name, val* (*func)(env*, val*));
+
 // builtin
 
 val* builtin_add(env* e, val* args);
@@ -114,6 +116,7 @@ val* builtin_is_nil(env* e, val* args);
 val* builtin_print(env* e, val* args);
 
 val* builtin_load_plugin(env* e, val* args);
+val* builtin_run_script(env* e, val* args);
 
 // external
 

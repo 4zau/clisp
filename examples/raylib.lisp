@@ -21,7 +21,6 @@
 
 (rl-init screen-w screen-h "peak")
 
-
 (def check-collision (lambda! ()
     (if (< cx (+ px pw)) (if (> (+ cx cw) px)
     (if (< cy (+ py ph)) (if (> (+ cy cw) py) 1 NIL) NIL) NIL) NIL)

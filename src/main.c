@@ -7,6 +7,12 @@
 
 static env* global_env_ptr = NULL;
 
+void bind_func(env* e, char* name, val* (*func)(env*, val*)) {
+    val* f = val_create_fun(func);
+    env_put(e, name, f);
+    val_free(f);
+}
+
 static void print_help() {
     printf("LISP interpreter in REPL mode\n");
     printf("lisp [file] to run a script\n");
@@ -21,27 +27,28 @@ static void print_help() {
 static env* create_global_env() {
     env* env = env_create(NULL);
 
-    val* fun_add = val_create_fun(builtin_add); env_put(env, "+", fun_add); val_free(fun_add);
-    val* fun_sub = val_create_fun(builtin_sub); env_put(env, "-", fun_sub); val_free(fun_sub);
-    val* fun_mul = val_create_fun(builtin_mul); env_put(env, "*", fun_mul); val_free(fun_mul);
-    val* fun_div = val_create_fun(builtin_div); env_put(env, "/", fun_div); val_free(fun_div);
-    val* fun_mod = val_create_fun(builtin_mod); env_put(env, "%", fun_mod); val_free(fun_mod);
+    bind_func(env, "+", builtin_add);
+    bind_func(env, "-", builtin_sub);
+    bind_func(env, "*", builtin_mul);
+    bind_func(env, "/", builtin_div);
+    bind_func(env, "%", builtin_mod);
 
-    val* fun_eq = val_create_fun(builtin_eq); env_put(env, "=", fun_eq); val_free(fun_eq);
-    val* fun_gt = val_create_fun(builtin_gt); env_put(env, ">", fun_gt); val_free(fun_gt);
-    val* fun_lt = val_create_fun(builtin_lt); env_put(env, "<", fun_lt); val_free(fun_lt);
+    bind_func(env, "=", builtin_eq);
+    bind_func(env, ">", builtin_gt);
+    bind_func(env, "<", builtin_lt);
 
-    val* fun_list = val_create_fun(builtin_list); env_put(env, "list", fun_list); val_free(fun_list);
-    val* fun_car = val_create_fun(builtin_car); env_put(env, "car", fun_car); val_free(fun_car);
-    val* fun_cdr = val_create_fun(builtin_cdr); env_put(env, "cdr", fun_cdr); val_free(fun_cdr);
-    val* fun_cons = val_create_fun(builtin_cons); env_put(env, "cons", fun_cons); val_free(fun_cons);
+    bind_func(env, "list", builtin_list);
+    bind_func(env, "car", builtin_car);
+    bind_func(env, "cdr", builtin_cdr);
+    bind_func(env, "cons", builtin_cons);
 
-    val* fun_not = val_create_fun(builtin_not); env_put(env, "not", fun_not); val_free(fun_not);
-    val* fun_is_nil = val_create_fun(builtin_is_nil); env_put(env, "is_nil", fun_is_nil); val_free(fun_is_nil);
+    bind_func(env, "not", builtin_not);
+    bind_func(env, "is_nil", builtin_is_nil);
 
-    val* fun_print = val_create_fun(builtin_print); env_put(env, "print", fun_print); val_free(fun_print);
+    bind_func(env, "print", builtin_print);
 
-    val* fun_load = val_create_fun(builtin_load_plugin); env_put(env, "load-plugin", fun_load); val_free(fun_load);
+    bind_func(env, "load-plugin", builtin_load_plugin);
+    bind_func(env, "run-script", builtin_run_script);
 
     return env;
 }

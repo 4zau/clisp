@@ -135,7 +135,24 @@ val* builtin_load_plugin(env* e, val* args) {
     
     if (load_plugin(e, args->car->string) != 0) {
         char err_buf[512];
-        snprintf(err_buf, sizeof(err_buf), "ERR: Failed to load plugin from path '%s'", args->car->string);
+        snprintf(err_buf, sizeof(err_buf), "ERR: failed to load plugin from path '%s'", args->car->string);
+        return val_create_err(err_buf);
+    }
+    
+    return val_create_nil();
+}
+
+val* builtin_run_script(env* e, val* args) {
+    if (args->type != VAL_CONS || args->cdr->type != VAL_NIL) {
+        return val_create_err("ERR: 'run-script' expects exactly 1 argument");
+    }
+    if (args->car->type != VAL_STRING) {
+        return val_create_err("ERR: 'run-script' expects a string (path to script)");
+    }
+    
+    if (run_file(e, args->car->string) != 0) {
+        char err_buf[512];
+        snprintf(err_buf, sizeof(err_buf), "ERR: failed to run script from path '%s'", args->car->string);
         return val_create_err(err_buf);
     }
     

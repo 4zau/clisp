@@ -12,12 +12,6 @@ long get_int(val** curr) {
     return v;
 }
 
-void bind_func(env* e, char* name, val* (*func)(env*, val*)) {
-    val* f = val_create_fun(func);
-    env_put(e, name, f);
-    val_free(f);
-}
-
 val* rl_init(env* e, val* args) {
     long w = get_int(&args);
     long h = get_int(&args);
