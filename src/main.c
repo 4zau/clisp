@@ -100,10 +100,12 @@ int main(int argc, char** argv) {
                 }
             } else {
                 fprintf(stderr, "ERR: -p/--plugin requires a library path\n");
+                env_free(global_env_ptr);
                 return 1;
             }
         } else if (argv[i][0] == '-') {
             fprintf(stderr, "ERR: unknown argument '%s'\n", argv[i]);
+            env_free(global_env_ptr);
             return 1;
         } else {
             file_to_run = argv[i];
@@ -113,7 +115,7 @@ int main(int argc, char** argv) {
     
     if (repl_mode) {
         linenoiseSetCompletionCallback(completion); 
-        printf("\nLISP is running. CTRL+C to quit.\n\n");
+        printf("\nLISP is running. :q! to quit.\n\n");
         
         char* line;
         while ((line = linenoise("lisp> ")) != NULL) {
@@ -143,6 +145,10 @@ int main(int argc, char** argv) {
                     } else {
                         load_plugin(global_env_ptr, plugin_path);
                     }
+                }
+                else if (strncmp(line, ":q!", 3) == 0) {
+                    linenoiseFree(line);
+                    break;
                 }
                 else {
                     char* str = line;
