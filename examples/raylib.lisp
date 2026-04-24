@@ -1,4 +1,3 @@
-(load-plugin "./plugins/io.so")
 (load-plugin "./plugins/raylib.so")
 (load-plugin "./plugins/random.so")
 

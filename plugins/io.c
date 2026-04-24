@@ -19,15 +19,6 @@ val* plugin_read_string(env* e, val* args) {
     return val_create_string(buffer);
 }
 
-val* plugin_begin(env* e, val* args) {
-    if (args->type == VAL_NIL) return val_create_nil();
-    val* curr = args;
-    while (curr->cdr->type == VAL_CONS) {
-        curr = curr->cdr;
-    }
-    return val_copy(curr->car);
-}
-
 void lisp_plugin_init(env* e) {
     val* f1 = val_create_fun(plugin_read_num);
     env_put(e, "read-num", f1); val_free(f1);
@@ -35,8 +26,5 @@ void lisp_plugin_init(env* e) {
     val* f2 = val_create_fun(plugin_read_string);
     env_put(e, "read-string", f2); val_free(f2);
 
-    val* f3 = val_create_fun(plugin_begin);
-    env_put(e, "begin", f3); val_free(f3);
-
-    printf("successfully added functions: 'read-num', 'read-string', 'begin'\n");
+    printf("successfully added functions: 'read-num', 'read-string'\n");
 }

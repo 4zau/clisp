@@ -182,3 +182,12 @@ val* builtin_is_nil(env* e, val* args) {
 
     return val_create_nil();
 }
+
+val* builtin_begin(env* e, val* args) {
+    if (args->type == VAL_NIL) return val_create_nil();
+    val* curr = args;
+    while (curr->cdr->type == VAL_CONS) {
+        curr = curr->cdr;
+    }
+    return val_copy(curr->car);
+}

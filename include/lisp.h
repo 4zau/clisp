@@ -115,6 +115,8 @@ val* builtin_is_nil(env* e, val* args);
 
 val* builtin_print(env* e, val* args);
 
+val* builtin_begin(env* e, val* args);
+
 val* builtin_load_plugin(env* e, val* args);
 val* builtin_run_script(env* e, val* args);
 

@@ -1,5 +1,4 @@
 ; more of a set! showcase tbh
-(load-plugin "./plugins/io.so")
 
 (def energy 10)
 (def hunger 5)

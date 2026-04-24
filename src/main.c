@@ -47,6 +47,8 @@ static env* create_global_env() {
 
     bind_func(env, "print", builtin_print);
 
+    bind_func(env, "begin", builtin_begin);
+
     bind_func(env, "load-plugin", builtin_load_plugin);
     bind_func(env, "run-script", builtin_run_script);
 
