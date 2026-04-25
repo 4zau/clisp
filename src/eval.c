@@ -83,9 +83,6 @@ val* val_eval(env* e, val* v) {
                 return val_create_err("ERR: 'lambda' expects arguments list and a body");
             }
             
-            val* formals = args->car;
-            val* body = args->cdr->car;
-            
             return val_create_lambda(e, args->car, args->cdr->car, 1); 
         }
 

@@ -62,7 +62,7 @@ static val* builtin_cmp(env* e, val* args, char* op) {
     }
     
     if (a->type != VAL_INT || b->type != VAL_INT) {
-        return val_create_err("ERR: comparison expects numbers");
+        return val_create_err("ERR: comparison expects numbers or strings");
     }
 
     int res = 0;

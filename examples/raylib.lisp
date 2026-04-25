@@ -69,8 +69,8 @@
 
 (def update-playing (lambda! ()
     (begin
-        (if (rl-is-key-down 262) (if (< px (- screen-w pw)) (set! px (+ px p-speed)) NIL) NIL)
-        (if (rl-is-key-down 263) (if (> px 0) (set! px (- px p-speed)) NIL) NIL)
+        (if (rl-is-key-down 262) (if (< px (- screen-w pw)) (set! px (+ px p-speed)) NIL) NIL) ; right
+        (if (rl-is-key-down 263) (if (> px 0) (set! px (- px p-speed)) NIL) NIL)               ; left
 
         (set! cy (+ cy c-speed))
 
