@@ -48,6 +48,8 @@ typedef struct val {
     };
 } val;
 
+extern val global_nil;
+
 val* val_create_nil();
 val* val_create_int(long num);
 val* val_create_symbol(char* symbol);

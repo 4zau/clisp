@@ -3,6 +3,8 @@
 #include <string.h>
 #include "lisp.h"
 
+val global_nil;
+
 static lambda_cache* cache_create() {
     lambda_cache* c = malloc(sizeof(lambda_cache));
     c->ref_count = 1;
@@ -27,8 +29,7 @@ static void cache_free(lambda_cache* c) {
 }
 
 val* val_create_nil() {
-    val* v = malloc(sizeof(val));
-    v->type = VAL_NIL;
+    val* v = &global_nil;
     return v;
 }
 
@@ -124,6 +125,7 @@ void val_print(val* v) {
 
 void val_free(val* v) {
     switch (v->type) {
+        case VAL_NIL: return;
         case VAL_SYMBOL: free(v->symbol); break;
         case VAL_STRING: free(v->string); break;
         case VAL_CONS: val_free(v->car); val_free(v->cdr); break;

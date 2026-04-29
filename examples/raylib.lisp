@@ -111,7 +111,7 @@
 
 (def update-game-over (lambda! ()
     (begin
-        (if (rl-is-key-down 265)
+        (if (rl-is-key-down 265) ; up arrow
             (begin
                 (set! state 0)
                 (set! score 0)

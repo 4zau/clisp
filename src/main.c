@@ -52,6 +52,8 @@ static env* create_global_env() {
     bind_func(env, "load-plugin", builtin_load_plugin);
     bind_func(env, "run-script", builtin_run_script);
 
+    global_nil.type = VAL_NIL;
+
     return env;
 }
 
