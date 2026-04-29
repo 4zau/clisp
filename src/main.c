@@ -16,6 +16,7 @@ void bind_func(env* e, char* name, val* (*func)(env*, val*)) {
 static void print_help() {
     printf("LISP interpreter in REPL mode\n");
     printf("lisp [file] to run a script\n");
+    printf("(try ./lisp.out examples/raylib.lisp)\n");
     printf("lisp -p [lib.so] to start with a plugin\n");
     printf("use 'def' to create variables or lambda functions (lambda! for no cache).\n");
     printf("use 'set!' to update existing global variables.\n");
