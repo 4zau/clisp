@@ -74,13 +74,17 @@ int val_eq(val* a, val* b);
 
 // environment
 
+typedef struct env_entry {
+    char* symbol;
+    struct val* value;
+} env_entry;
+
 typedef struct env {
     struct env* parent;
     int ref_count;
     long count;
     long capacity;
-    char** symbols;
-    val** vals;
+    env_entry* entries;
 } env;
 
 env* env_create(env* parent);

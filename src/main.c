@@ -14,14 +14,14 @@ void bind_func(env* e, char* name, val* (*func)(env*, val*)) {
 }
 
 static void print_help() {
-    printf("LISP interpreter in REPL mode\n");
+    printf("LISP interpreter in REPL mode\n\n");
     printf("lisp [file] to run a script\n");
     printf("(try ./lisp.out examples/raylib.lisp)\n");
-    printf("lisp -p [lib.so] to start with a plugin\n");
+    printf("lisp -p [lib.so] to start with a plugin\n\n");
     printf("use 'def' to create variables or lambda functions (lambda! for no cache).\n");
     printf("use 'set!' to update existing global variables.\n");
-    printf("example: (def fib (lambda (n) (if (< n 2) n (+ (fib (- n 1)) (fib (- n 2))))))\n");
-    printf("use ':l <filename>' to load and run a script file.\n");
+    printf("example: (def fib (lambda (n) (if (< n 2) n (+ (fib (- n 1)) (fib (- n 2))))))\n\n");
+    printf("use ':l <filename>' (or run-script) to load and run a script file.\n");
     printf("use ':p <path to plugin>' (or load-plugin) to load a plugin.\n");
 }
 
@@ -73,12 +73,12 @@ static void completion(const char *buf, linenoiseCompletions *lc) {
 
     env* e = global_env_ptr;
     while (e != NULL) {
-        for (int i = 0; i < e->count; i++) {
-            if (strncmp(e->symbols[i], last_word, prefix_len) == 0) {
+        for (long i = 0; i < e->capacity; i++) {
+            if (e->entries[i].symbol != NULL && strncmp(e->entries[i].symbol, last_word, prefix_len) == 0) {
                 char completion_str[512];
                 int prefix_pos = last_word - buf;
                 snprintf(completion_str, sizeof(completion_str), "%.*s%s", 
-                         prefix_pos, buf, e->symbols[i]);
+                         prefix_pos, buf, e->entries[i].symbol);
                 linenoiseAddCompletion(lc, completion_str);
             }
         }
@@ -180,9 +180,12 @@ int main(int argc, char** argv) {
         run_file(global_env_ptr, file_to_run);
     }
 
-    for (int i = 0; i < global_env_ptr->count; i++) {
-        free(global_env_ptr->symbols[i]);
-        val_free(global_env_ptr->vals[i]);
+    for (long i = 0; i < global_env_ptr->capacity; i++) {
+        if (global_env_ptr->entries[i].symbol != NULL) {
+            free(global_env_ptr->entries[i].symbol);
+            val_free(global_env_ptr->entries[i].value);
+            global_env_ptr->entries[i].symbol = NULL; 
+        }
     }
     global_env_ptr->count = 0;
     env_free(global_env_ptr);
